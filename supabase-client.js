@@ -136,15 +136,23 @@ window.loadData = async function() {
     }
   } catch (err) {
     console.error('Erro ao carregar do Supabase:', err);
+    // Tentar localStorage
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         demandas = JSON.parse(saved);
-      } else {
+      } else if (typeof DEFAULT_DEMANDAS !== 'undefined') {
         demandas = JSON.parse(JSON.stringify(DEFAULT_DEMANDAS));
+      } else {
+        console.log('Sem dados disponíveis');
+        demandas = [];
       }
     } catch (e) {
-      demandas = JSON.parse(JSON.stringify(DEFAULT_DEMANDAS));
+      if (typeof DEFAULT_DEMANDAS !== 'undefined') {
+        demandas = JSON.parse(JSON.stringify(DEFAULT_DEMANDAS));
+      } else {
+        demandas = [];
+      }
     }
     isOnline = false;
     updateConnectionStatus();

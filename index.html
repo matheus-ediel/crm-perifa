@@ -2534,16 +2534,16 @@ function formatDate(dateStr) {
 <!-- Supabase Client - carrega ANTES do init -->
 <script src="supabase-client.js"></script>
 
-<script>
-// Start - agora o supabase-client.js já sobrescreveu loadData
-init();
-</script>
-
 <div class="footer">
   <span id="connection-status">🔄 Conectando...</span> ·
   <span>☁️ Supabase Cloud</span> ·
   Última atualização: <span id="last-save">—</span>
 </div>
+
+<script>
+// Start - agora o supabase-client.js já sobrescreveu loadData
+document.addEventListener('DOMContentLoaded', init);
+</script>
 
 </body>
 </html>
