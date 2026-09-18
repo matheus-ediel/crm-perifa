@@ -1,4 +1,4 @@
-// Configuração do Supabase (exposta no cliente - é a anon key pública)
+// Configuração do Supabase
 const SUPABASE_URL = 'https://osrxyshcmaazppqwrtlt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zcnh5c2hjbWFhenBwcXdydGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MTkwNDksImV4cCI6MjEwNTI5NTA0OX0.bVBWuZwonazqLLowDEKINf4drpAnZX_mMFeatMGhIO4';
 
@@ -24,12 +24,18 @@ async function supabaseRequest(path, options = {}) {
 
 // Transformar dados do banco para formato do front-end
 function transformFromDB(row) {
+  // Tratar history
   let history = row.history || [];
   if (typeof history === 'string') {
     try { history = JSON.parse(history); } catch { history = []; }
   }
 
-  let arquivo = { tipo: row.arquivo_tipo, thumb: row.arquivo_thumb, nome: row.arquivo_nome };
+  // Tratar arquivo
+  let arquivo = {
+    tipo: row.arquivo_tipo || (row.arquivo ? row.arquivo.tipo : null),
+    thumb: row.arquivo_thumb || (row.arquivo ? row.arquivo.thumb : null),
+    nome: row.arquivo_nome || (row.arquivo ? row.arquivo.nome : null)
+  };
   if (typeof row.arquivo === 'string') {
     try { arquivo = JSON.parse(row.arquivo); } catch {}
   }
@@ -46,12 +52,13 @@ function transformFromDB(row) {
     descricao: row.descricao || '',
     copy: row.copy || '',
     arquivo: arquivo,
-    image: row.image || row.arquivo?.thumb || null,
+    // Image vem direto do campo image ou arquivo.thumb
+    image: row.image || (row.arquivo ? row.arquivo.thumb : null) || null,
     imageName: row.imagename || row.arquivo?.nome || '',
     alt: row.alt || '',
     history: history,
-    createdAt: row.createdat,
-    updatedAt: row.updatedat
+    createdAt: row.createdat || row.createdAt,
+    updatedAt: row.updatedat || row.updatedAt
   };
 }
 
@@ -74,16 +81,17 @@ function transformToDB(demanda) {
     history: demanda.history || [],
     createdat: demanda.createdAt,
     updatedat: new Date().toISOString(),
-    image: demanda.image || null,
+    image: demanda.image || null,  // Imagem em base64
     imagename: demanda.imageName || null,
     alt: demanda.alt || null
   };
 }
 
-// Sobrescrever loadData para usar Supabase
+// Sobrescrever loadData
 const originalLoadData = window.loadData;
 window.loadData = async function() {
   try {
+    // Select com todos os campos
     const data = await supabaseRequest('/demandas?select=*&order=id.asc');
 
     if (data && data.length > 0) {
@@ -92,12 +100,12 @@ window.loadData = async function() {
       updateConnectionStatus();
       renderAll();
       console.log('📊 ' + demandas.length + ' demandas carregadas do Supabase');
+      console.log('🖼️  Imagens:', demandas.filter(d => d.image).length + ' com imagem');
     } else {
       throw new Error('No data');
     }
   } catch (err) {
-    console.log('Erro ao carregar do Supabase:', err.message);
-    // Fallback para localStorage
+    console.error('Erro ao carregar do Supabase:', err);
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -114,10 +122,9 @@ window.loadData = async function() {
   }
 };
 
-// Sobrescrever saveData para usar Supabase
+// Sobrescrever saveData
 const originalSaveData = window.saveData;
 window.saveData = async function() {
-  // Salva no Supabase
   try {
     // Buscar IDs existentes
     const existing = await supabaseRequest('/demandas?select=id');
@@ -137,15 +144,15 @@ window.saveData = async function() {
       }
     }
 
-    // Inserir todos
+    // Inserir todos - um por um para garantir que as imagens grandes sejam salvas
     for (const demanda of demandas) {
       const dbData = transformToDB(demanda);
       await supabaseRequest('/demandas', { method: 'POST', body: dbData });
     }
 
-    console.log('💾 ' + demandas.length + ' demandas salvas no Supabase');
+    console.log('💾 ' + demandas.length + ' demandas salvas (incluindo imagens)');
   } catch (err) {
-    console.error('Erro ao salvar no Supabase:', err.message);
+    console.error('Erro ao salvar no Supabase:', err);
     // Fallback para localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(demandas));
   }
