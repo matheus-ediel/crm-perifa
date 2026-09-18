@@ -679,6 +679,189 @@ body {
 .file-upload-btn.danger { color: #A8286A; border-color: #A8286A; }
 .file-upload-btn.danger:hover { background: #fff5f5; }
 
+/* MULTI-FILE UPLOAD */
+.files-upload-area {
+  border: 2px dashed #C8B0D9;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  min-height: 100px;
+}
+.files-upload-area:hover { border-color: var(--accent); }
+.files-upload-area.drag-over { border-color: var(--accent); background: #fff5f8; }
+.files-upload-area .icon { font-size: 40px; margin-bottom: 8px; }
+.files-upload-area .text { font-size: 13px; color: var(--text-muted); }
+.files-upload-area .text strong { color: var(--accent); }
+.files-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.file-preview-item {
+  position: relative;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.file-preview-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+.file-preview-item video {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+.file-preview-item.file-preview-other {
+  padding: 16px;
+  text-align: center;
+}
+.file-preview-icon {
+  font-size: 40px;
+}
+.file-preview-name {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+.file-preview-remove:hover { background: #A8286A; }
+
+/* FILES GALLERY IN MODAL */
+.modal-files-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.gallery-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.gallery-item:hover { transform: scale(1.02); border-color: var(--accent); }
+.gallery-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+.gallery-item-video video {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: #000;
+}
+.gallery-item-other {
+  padding: 20px;
+  text-align: center;
+  background: var(--bg);
+}
+.gallery-item-icon { font-size: 48px; }
+.gallery-item-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.gallery-item-name {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gallery-download-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.gallery-item:hover .gallery-download-btn { opacity: 1; }
+
+/* FILE VIEWER (LIGHTBOX) */
+.file-viewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.file-viewer-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+.file-viewer-content img {
+  max-width: 100%;
+  max-height: 80vh;
+  display: block;
+}
+.file-viewer-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+.file-viewer-close:hover { background: rgba(255,255,255,0.3); }
+.file-viewer-name {
+  text-align: center;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+}
+
 /* COPY EDITOR */
 .copy-editor {
   position: relative;
@@ -1018,24 +1201,23 @@ body {
     <!-- CONTENT PREVIEW -->
     <div class="content-preview" id="modal-content-preview">
       <div class="content-preview-header">
-        <h4>📎 Conteúdo da Demanda</h4>
+        <h4>📎 Arquivos da Demanda</h4>
         <div class="content-type-label" id="modal-content-type"></div>
       </div>
 
-      <!-- Image/Video Area -->
-      <div class="content-image-container" id="modal-image-container">
+      <!-- Files Gallery -->
+      <div class="modal-files-gallery" id="modal-files-gallery">
         <div class="content-image-placeholder" id="modal-image-placeholder">
           <div class="icon">📎</div>
-          <div class="text">Arquivo não adicionado</div>
+          <div class="text">Nenhum arquivo adicionado</div>
         </div>
-        <img id="modal-image" class="content-image hidden" alt="Preview">
       </div>
+    </div>
 
-      <!-- Copy Area -->
-      <div class="content-copy-box" id="modal-copy-box">
-        <label>✍️ Copy / Texto</label>
-        <pre id="modal-copy">Sem copy adicionado</pre>
-      </div>
+    <!-- Copy Area -->
+    <div class="content-copy-box" id="modal-copy-box">
+      <label>✍️ Copy / Texto</label>
+      <pre id="modal-copy">Sem copy adicionado</pre>
     </div>
 
     <!-- DESCRIPTION -->
@@ -1133,21 +1315,23 @@ body {
       <div class="form-section" id="content-fields-section">
         <h4>🎨 Conteúdo</h4>
 
-        <!-- Image Upload -->
-        <div class="form-group" id="image-upload-group">
-          <label>📷 Arquivo / Imagem</label>
-          <div class="file-upload-area" id="image-upload-area" onclick="document.getElementById('new-image').click()">
-            <input type="file" id="new-image" accept="image/*,.pdf,.html,.doc,.docx,.mp4,.mov" onchange="handleImageUpload(this)">
-            <div id="image-upload-placeholder">
-              <div class="icon">📷</div>
-              <div class="text">Clique para adicionar imagem ou arquivo<br><strong>ou arraste aqui</strong></div>
+        <!-- Files Upload -->
+        <div class="form-group" id="files-upload-group">
+          <label>📎 Arquivos / Imagens / Vídeos / PDFs</label>
+          <div class="files-upload-area" id="files-upload-area" ondragover="event.preventDefault();event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="handleFileDrop(event)">
+            <input type="file" id="new-files" multiple accept="*/*" onchange="handleFileUpload(this)" style="display:none">
+            <div id="files-placeholder">
+              <div class="icon">📎</div>
+              <div class="text">Clique para adicionar ou arraste arquivos aqui<br><strong>Múltiplos arquivos permitidos</strong></div>
+              <div style="margin-top:8px">
+                <button type="button" class="file-upload-btn" onclick="event.stopPropagation();document.getElementById('new-files').click()">+ Adicionar Arquivos</button>
+              </div>
             </div>
-            <img id="image-preview" class="file-upload-preview hidden">
-            <div class="file-upload-name" id="image-upload-name"></div>
+            <div id="files-preview-container" class="files-preview-grid"></div>
           </div>
-          <div class="file-upload-actions" id="image-upload-actions" style="display:none">
-            <button type="button" class="file-upload-btn" onclick="event.stopPropagation();document.getElementById('new-image').click()">🔄 Trocar</button>
-            <button type="button" class="file-upload-btn danger" onclick="event.stopPropagation();clearImageUpload()">🗑️ Remover</button>
+          <div class="file-upload-actions" id="files-actions" style="display:none;margin-top:8px">
+            <button type="button" class="file-upload-btn" onclick="document.getElementById('new-files').click()">+ Adicionar Mais</button>
+            <button type="button" class="file-upload-btn danger" onclick="clearAllFiles()">🗑️ Limpar Tudo</button>
           </div>
         </div>
 
@@ -1227,10 +1411,109 @@ let currentView = 'kanban';
 let isOnline = false;
 let lastServerSave = null;
 
-// Variáveis globais para imagem
-window.newImageData = null;
-window.newImageName = '';
-window.newImageUrl = null; // URL da imagem no servidor
+// Variáveis globais para múltiplos arquivos
+window.newFiles = []; // Array de {url: base64, name: string, type: string}
+window.existingFiles = []; // Arquivos já salvos da demanda em edição
+
+// Função para adicionar arquivo
+function addFiles(filesArray) {
+  for (let file of filesArray) {
+    window.newFiles.push(file);
+  }
+  renderFilesPreview();
+}
+
+// Função para remover arquivo
+function removeFile(index) {
+  window.newFiles.splice(index, 1);
+  renderFilesPreview();
+}
+
+// Renderizar preview dos arquivos
+function renderFilesPreview() {
+  const container = document.getElementById('files-preview-container');
+  const placeholder = document.getElementById('files-placeholder');
+  const actions = document.getElementById('files-actions');
+
+  if (!container) return;
+
+  // Mostrar placeholder se não tem arquivos
+  if (window.newFiles.length === 0) {
+    placeholder.style.display = 'flex';
+    actions.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  actions.style.display = 'flex';
+
+  container.innerHTML = window.newFiles.map((file, i) => {
+    const isImage = file.type && file.type.startsWith('image/');
+    const isVideo = file.type && file.type.startsWith('video/');
+
+    if (isImage) {
+      return `<div class="file-preview-item">
+        <img src="${file.url}" alt="${file.name}">
+        <button type="button" class="file-preview-remove" onclick="removeFile(${i})">×</button>
+        <div class="file-preview-name">${file.name}</div>
+      </div>`;
+    } else if (isVideo) {
+      return `<div class="file-preview-item file-preview-video">
+        <video src="${file.url}"></video>
+        <button type="button" class="file-preview-remove" onclick="removeFile(${i})">×</button>
+        <div class="file-preview-name">${file.name}</div>
+      </div>`;
+    } else {
+      return `<div class="file-preview-item file-preview-other">
+        <div class="file-preview-icon">📄</div>
+        <button type="button" class="file-preview-remove" onclick="removeFile(${i})">×</button>
+        <div class="file-preview-name">${file.name}</div>
+      </div>`;
+    }
+  }).join('');
+}
+
+// Handler para upload de múltiplos arquivos
+function handleFileUpload(input) {
+  const files = input.files;
+  if (!files || files.length === 0) return;
+
+  for (let file of files) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      window.newFiles.push({
+        url: e.target.result,
+        name: file.name,
+        type: file.type
+      });
+      renderFilesPreview();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Limpar input para permitir selecionar os mesmos arquivos novamente
+  input.value = '';
+}
+
+// Função para limpar todos os arquivos
+function clearAllFiles() {
+  window.newFiles = [];
+  window.existingFiles = [];
+  renderFilesPreview();
+}
+
+// Handler para drag and drop
+function handleFileDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
+
+  const files = e.dataTransfer.files;
+  if (files && files.length > 0) {
+    handleFileUpload({ files: files });
+  }
+}
 
 // ════════════════════════════════════════════════════════════
 // SERVIDOR PARA IMAGENS (NUVEM)
@@ -1295,14 +1578,13 @@ function salvarNovaDemanda() {
         demandas[i].copy = copyTexto || '';
         demandas[i].updatedAt = now;
 
-        // Atualiza imagem se uma nova foi selecionada (upload para servidor)
-        if (window.newImageData && window.newImageName) {
-          uploadImageToServer(window.newImageData, window.newImageName).then(function(imageUrl) {
-            demandas[i].image = imageUrl;
-            demandas[i].imageName = window.newImageName;
-            saveData();
-          });
-        }
+        // Atualiza arquivos - combina existentes + novos
+        var allFiles = [...window.existingFiles, ...window.newFiles];
+        demandas[i].files = allFiles;
+        demandas[i].image = allFiles.length > 0 ? allFiles[0].url : null;
+        demandas[i].imageName = allFiles.length > 0 ? allFiles[0].name : '';
+
+        saveData();
         break;
       }
     }
@@ -1325,117 +1607,27 @@ function salvarNovaDemanda() {
       data: dataPrazo || '—',
       descricao: descricao || '',
       copy: copyTexto || '',
-      image: null,
-      imageName: window.newImageName || '',
+      files: window.newFiles, // Usa o array de arquivos
+      image: window.newFiles.length > 0 ? window.newFiles[0].url : null,
+      imageName: window.newFiles.length > 0 ? window.newFiles[0].name : '',
       alt: '',
       history: [{ status: status, data: now }],
       createdAt: now,
       updatedAt: now
     };
 
-    // Upload imagem para servidor se existir
-    if (window.newImageData) {
-      uploadImageToServer(window.newImageData, window.newImageName || 'imagem.png').then(function(imageUrl) {
-        novaDemanda.image = imageUrl;
-        saveData();
-      });
-    }
-
     demandas.push(novaDemanda);
+    saveData();
   }
 
-  // Salva no localStorage (sem imagens - muito grandes)
-  try {
-    // Testa se localStorage está cheio
-    try {
-      localStorage.setItem('__test__', '1');
-      localStorage.removeItem('__test__');
-    } catch (e) {
-      if (e.name === 'QuotaExceededError') {
-        console.log('LocalStorage cheio, limpando...');
-        localStorage.removeItem('crm-perifa-v3');
-      }
-    }
+  // Limpa os campos de arquivo
+  window.newFiles = [];
+  window.existingFiles = [];
+  renderFilesPreview();
 
-    // Primeiro tenta limpar dados antigos se necessário
-    var dadosAtuais = localStorage.getItem('crm-perifa-v3');
-    if (dadosAtuais) {
-      try {
-        JSON.parse(dadosAtuais); // Testa se está válido
-      } catch(e) {
-        // Dados corrompidos, limpa
-        localStorage.removeItem('crm-perifa-v3');
-      }
-    }
-
-    // Cria cópia sem imagens para salvar
-    var demandasSemImagens = demandas.map(function(d) {
-      return {
-        id: d.id,
-        titulo: d.titulo,
-        cliente: d.cliente,
-        pilar: d.pilar,
-        tipo: d.tipo,
-        canal: d.canal,
-        status: d.status,
-        data: d.data,
-        descricao: d.descricao,
-        copy: d.copy,
-        imageName: d.imageName || '',
-        alt: d.alt || '',
-        history: d.history,
-        createdAt: d.createdAt,
-        updatedAt: d.updatedAt
-      };
-    });
-    localStorage.setItem('crm-perifa-v3', JSON.stringify(demandasSemImagens));
-  } catch (e) {
-    // localStorage cheio - limpa e tenta novamente
-    if (e.name === 'QuotaExceededError') {
-      localStorage.removeItem('crm-perifa-v3');
-      alert('Armazenamento cheio! Dados antigos foram removidos.');
-      var demandasSemImagens = demandas.map(function(d) {
-        return {
-          id: d.id,
-          titulo: d.titulo,
-          cliente: d.cliente,
-          pilar: d.pilar,
-          tipo: d.tipo,
-          canal: d.canal,
-          status: d.status,
-          data: d.data,
-          descricao: d.descricao,
-          copy: d.copy,
-          imageName: d.imageName || '',
-          alt: d.alt || '',
-          history: d.history,
-          createdAt: d.createdAt,
-          updatedAt: d.updatedAt
-        };
-      });
-      localStorage.setItem('crm-perifa-v3', JSON.stringify(demandasSemImagens));
-    } else {
-      alert('Erro ao salvar: ' + e.message);
-      return;
-    }
-  }
-
-  // Atualiza ultima salvamento
-  var lastSaveEl = document.getElementById('last-save');
-  if (lastSaveEl) {
-    lastSaveEl.textContent = new Date().toLocaleString('pt-BR');
-  }
-
-  // Fecha modal
-  document.getElementById('modal-new').classList.remove('open');
-
-  // Atualiza tela
-  renderKanban();
-  renderTimeline();
-  renderDashboard();
-  updateStats();
-
-  alert('Demanda "' + titulo + '" salva com sucesso!');
+  closeNewModal();
+  showToast('Demanda salva com sucesso!');
+  renderAll();
 }
 
 // Default data
@@ -1663,17 +1855,40 @@ function renderKanban() {
       card.draggable = true;
       card.dataset.id = d.id;
 
-      // Verifica se tem imagem (base64 ou URL do servidor)
-      var hasImage = d.image && (
-        (d.image.startsWith && d.image.startsWith('data:')) ||
-        (d.image.startsWith && d.image.startsWith('/api/')) ||
-        (d.image.startsWith && d.image.startsWith('http'))
+      // Verifica arquivos (suporta novo formato files[] e formato antigo image)
+      var files = d.files || [];
+      var firstImage = null;
+      var filesCount = files.length;
+
+      // Se não tem files[], mas tem image (formato antigo)
+      if (filesCount === 0 && d.image) {
+        firstImage = d.image;
+        filesCount = 1;
+      } else if (filesCount > 0) {
+        // Pegar primeira imagem do array
+        for (var f = 0; f < files.length; f++) {
+          if (files[f].url && (files[f].type || '').startsWith('image/')) {
+            firstImage = files[f].url;
+            break;
+          }
+        }
+        if (!firstImage && files[0].url) {
+          firstImage = files[0].url;
+        }
+      }
+
+      var hasImage = firstImage && (
+        firstImage.startsWith('data:') ||
+        firstImage.startsWith('/api/') ||
+        firstImage.startsWith('http')
       );
+
       var cardIcon = TIPO_ICONS[d.tipo] || '📎';
       var copyPreview = d.copy ? d.copy.substring(0, 80) + (d.copy.length > 80 ? '...' : '') : '';
 
-      card.innerHTML = '<div class="card-preview ' + (hasImage ? 'has-image' : '') + '" style="' + (hasImage ? 'background-image: url(' + d.image + ')' : '') + '">' +
+      card.innerHTML = '<div class="card-preview ' + (hasImage ? 'has-image' : '') + '" style="' + (hasImage ? 'background-image: url(' + firstImage + ')' : '') + '">' +
         (!hasImage ? '<span>' + cardIcon + '</span>' : '') +
+        (filesCount > 1 ? '<div class="file-badge">' + filesCount + '</div>' : '') +
         '<div class="card-badge">' +
           '<span>' + d.tipo + '</span>' +
           (copyPreview ? '<span class="badge-copy">' + copyPreview + '</span>' : '') +
@@ -1685,6 +1900,7 @@ function renderKanban() {
         '<div class="card-meta">' +
           '<span class="tag">' + (PILAR_LABELS[d.pilar] || d.pilar) + '</span>' +
           '<span class="tag">' + d.canal + '</span>' +
+          (filesCount > 0 ? '<span class="tag">' + filesCount + ' 📎</span>' : '') +
         '</div>' +
         '<div class="card-date">📅 ' + d.data + '</div>' +
       '</div>';
@@ -1884,25 +2100,62 @@ function openModal(id) {
   // Content Type Label
   document.getElementById('modal-content-type').innerHTML = (TIPO_ICONS[d.tipo] || '📎') + ' ' + d.tipo;
 
-  // Image - suporta base64 e URL do servidor
-  var imgPlaceholder = document.getElementById('modal-image-placeholder');
-  var img = document.getElementById('modal-image');
+  // Files Gallery - supports multiple files
+  var gallery = document.getElementById('modal-files-gallery');
+  var placeholder = document.getElementById('modal-image-placeholder');
 
-  var hasImage = d.image && (
-    (d.image.startsWith && d.image.startsWith('data:')) ||
-    (d.image.startsWith && d.image.startsWith('/api/')) ||
-    (d.image.startsWith && d.image.startsWith('http'))
-  );
-
-  if (hasImage) {
-    img.src = d.image;
-    img.classList.remove('hidden');
-    imgPlaceholder.classList.add('hidden');
-  } else {
-    img.classList.add('hidden');
-    imgPlaceholder.classList.remove('hidden');
-    imgPlaceholder.innerHTML = '<div class="icon">' + (TIPO_ICONS[d.tipo] || '📎') + '</div><div class="text">Arquivo não adicionado</div>';
+  // Get files array (supports both old and new format)
+  var files = d.files || [];
+  if (files.length === 0 && d.image) {
+    files = [{
+      url: d.image,
+      name: d.imageName || 'imagem',
+      type: d.imageName?.endsWith('.pdf') ? 'application/pdf' :
+            d.imageName?.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg'
+    }];
   }
+
+  if (files.length === 0) {
+    // No files
+    gallery.innerHTML = '';
+    placeholder.style.display = 'flex';
+  } else {
+    placeholder.style.display = 'none';
+    gallery.innerHTML = files.map((file, i) => {
+      var isImage = file.type && file.type.startsWith('image/');
+      var isVideo = file.type && file.type.startsWith('video/');
+      var isPdf = file.type === 'application/pdf';
+      var icon = isImage ? '🖼️' : isVideo ? '🎬' : isPdf ? '📄' : '📎';
+
+      if (isImage) {
+        return `<div class="gallery-item" onclick="openFileViewer(${i})">
+          <img src="${file.url}" alt="${file.name}">
+          ${files.length > 1 ? `<span class="gallery-item-badge">${i + 1}/${files.length}</span>` : ''}
+          <button class="gallery-download-btn" onclick="event.stopPropagation();downloadFile(${i})">⬇️</button>
+          <div class="gallery-item-name">${file.name}</div>
+        </div>`;
+      } else if (isVideo) {
+        return `<div class="gallery-item" onclick="openFileViewer(${i})">
+          <div class="gallery-item-video">
+            <video src="${file.url}"></video>
+          </div>
+          ${files.length > 1 ? `<span class="gallery-item-badge">${i + 1}/${files.length}</span>` : ''}
+          <button class="gallery-download-btn" onclick="event.stopPropagation();downloadFile(${i})">⬇️</button>
+          <div class="gallery-item-name">${file.name}</div>
+        </div>`;
+      } else {
+        return `<div class="gallery-item gallery-item-other" onclick="openFileViewer(${i})">
+          <div class="gallery-item-icon">${icon}</div>
+          ${files.length > 1 ? `<span class="gallery-item-badge">${i + 1}/${files.length}</span>` : ''}
+          <button class="gallery-download-btn" onclick="event.stopPropagation();downloadFile(${i})">⬇️</button>
+          <div class="gallery-item-name">${file.name}</div>
+        </div>`;
+      }
+    }).join('');
+  }
+
+  // Store current demand files for viewer
+  window.currentDemandFiles = files;
 
   // Copy
   const copyBox = document.getElementById('modal-copy-box');
@@ -1939,6 +2192,56 @@ function openModal(id) {
   `).join('');
 
   document.getElementById('modal').classList.add('open');
+}
+
+// Viewer de arquivo
+function openFileViewer(index) {
+  var files = window.currentDemandFiles || [];
+  if (index < 0 || index >= files.length) return;
+
+  var file = files[index];
+  var isImage = file.type && file.type.startsWith('image/');
+
+  if (isImage) {
+    // Abrir imagem em lightbox
+    var viewer = document.getElementById('file-viewer');
+    if (!viewer) {
+      viewer = document.createElement('div');
+      viewer.id = 'file-viewer';
+      viewer.className = 'file-viewer';
+      viewer.onclick = function() { this.remove(); };
+      document.body.appendChild(viewer);
+    }
+    viewer.innerHTML = `
+      <div class="file-viewer-content" onclick="event.stopPropagation()">
+        <button class="file-viewer-close" onclick="document.getElementById('file-viewer').remove()">✕</button>
+        <img src="${file.url}" alt="${file.name}">
+        <div class="file-viewer-name">${file.name}</div>
+        <button class="gallery-download-btn" onclick="downloadCurrentFile()" style="position:static;margin:8px auto;opacity:1">⬇️ Baixar</button>
+      </div>
+    `;
+    window.currentViewerIndex = index;
+  } else {
+    // Para outros arquivos, fazer download direto
+    downloadFile(index);
+  }
+}
+
+// Baixar arquivo específico
+function downloadFile(index) {
+  var files = window.currentDemandFiles || [];
+  if (index < 0 || index >= files.length) return;
+
+  var file = files[index];
+  var link = document.createElement('a');
+  link.href = file.url;
+  link.download = file.name;
+  link.click();
+}
+
+// Baixar arquivo atual do viewer
+function downloadCurrentFile() {
+  downloadFile(window.currentViewerIndex || 0);
 }
 
 function closeModal() {
@@ -1981,10 +2284,10 @@ function openNewModal(status = 'solicitado') {
   document.getElementById('new-status').value = status;
   document.getElementById('edit-id').value = '';
 
-  // Reset image upload
-  clearImageUpload();
-  window.newImageData = null;
-  window.newImageName = '';
+  // Reset files upload (novo sistema)
+  window.newFiles = [];
+  window.existingFiles = [];
+  renderFilesPreview();
 
   // Reset copy
   document.getElementById('copy-char-count').textContent = '0';
@@ -2023,75 +2326,27 @@ function openEditMode() {
   // Update char count
   document.getElementById('copy-char-count').textContent = (d.copy || '').length;
 
-  // Load existing image (suporta base64 e URL do servidor)
-  var hasImage = d.image && (
-    (d.image.startsWith && d.image.startsWith('data:')) ||
-    (d.image.startsWith && d.image.startsWith('/api/')) ||
-    (d.image.startsWith && d.image.startsWith('http'))
-  );
+  // Load existing files (novo sistema de múltiplos arquivos)
+  window.newFiles = [];
+  window.existingFiles = d.files || [];
 
-  if (hasImage) {
-    window.newImageData = d.image; // Usa a URL ou base64 existente
-    window.newImageName = d.imageName || 'imagem-atual';
-    document.getElementById('image-upload-placeholder').classList.add('hidden');
-    document.getElementById('image-upload-actions').style.display = 'flex';
-    document.getElementById('image-preview').classList.remove('hidden');
-    document.getElementById('image-preview').src = d.image;
-    document.getElementById('image-upload-name').textContent = d.imageName || 'Imagem atual';
-    document.getElementById('image-upload-area').classList.add('has-file');
-  } else {
-    window.newImageData = null;
-    window.newImageName = '';
-    clearImageUpload();
+  // Se tem imagem antiga (formato único), migrar para files
+  if (d.image && (!d.files || d.files.length === 0)) {
+    window.existingFiles = [{
+      url: d.image,
+      name: d.imageName || 'imagem',
+      type: d.imageName?.endsWith('.pdf') ? 'application/pdf' :
+            d.imageName?.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg'
+    }];
   }
+
+  renderFilesPreview();
 
   document.getElementById('modal-new').classList.add('open');
 }
 
 function closeNewModal() {
   document.getElementById('modal-new').classList.remove('open');
-}
-
-function handleImageUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    window.newImageData = e.target.result;
-    window.newImageName = file.name;
-
-    // Show preview for images
-    if (file.type.startsWith('image/')) {
-      document.getElementById('image-preview').classList.remove('hidden');
-      document.getElementById('image-preview').src = window.newImageData;
-      document.getElementById('image-upload-placeholder').classList.add('hidden');
-    } else {
-      document.getElementById('image-preview').classList.add('hidden');
-      document.getElementById('image-upload-placeholder').classList.remove('hidden');
-      document.getElementById('image-upload-placeholder').querySelector('.icon').textContent = '📄';
-      document.getElementById('image-upload-placeholder').querySelector('.text').innerHTML = file.name;
-    }
-
-    document.getElementById('image-upload-name').textContent = file.name;
-    document.getElementById('image-upload-actions').style.display = 'flex';
-    document.getElementById('image-upload-area').classList.add('has-file');
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearImageUpload() {
-  window.newImageData = null;
-  window.newImageName = '';
-  document.getElementById('new-image').value = '';
-  document.getElementById('image-preview').classList.add('hidden');
-  document.getElementById('image-preview').src = '';
-  document.getElementById('image-upload-placeholder').classList.remove('hidden');
-  document.getElementById('image-upload-placeholder').querySelector('.icon').textContent = '📷';
-  document.getElementById('image-upload-placeholder').querySelector('.text').innerHTML = 'Clique para adicionar imagem ou arquivo<br><strong>ou arraste aqui</strong>';
-  document.getElementById('image-upload-name').textContent = '';
-  document.getElementById('image-upload-actions').style.display = 'none';
-  document.getElementById('image-upload-area').classList.remove('has-file');
 }
 
 function updateCharCount() {

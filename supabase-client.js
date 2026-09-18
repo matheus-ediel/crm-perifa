@@ -30,14 +30,31 @@ function transformFromDB(row) {
     try { history = JSON.parse(history); } catch { history = []; }
   }
 
-  // Tratar arquivo
-  let arquivo = {
-    tipo: row.arquivo_tipo || null,
-    thumb: row.arquivo_thumb || null,
-    nome: row.arquivo_nome || null
-  };
-  if (typeof row.arquivo === 'string') {
-    try { arquivo = JSON.parse(row.arquivo); } catch {}
+  // Tratar arquivos - suporta formato antigo (image única) e novo (files array)
+  let files = [];
+
+  // Se já existe o campo files (novo formato)
+  if (row.files && Array.isArray(row.files)) {
+    files = row.files;
+  } else {
+    // Migrar do formato antigo: image + imageName
+    if (row.image) {
+      files.push({
+        url: row.image,
+        name: row.imagename || 'imagem',
+        type: row.imagename?.endsWith('.pdf') ? 'application/pdf' :
+              row.imagename?.endsWith('.mp4') ? 'video/mp4' :
+              row.imagename?.endsWith('.doc') ? 'application/msword' : 'image/jpeg'
+      });
+    }
+    // Também migrar de arquivo_nome (outro formato antigo)
+    if (row.arquivo_nome && !row.image) {
+      files.push({
+        url: row.arquivo_thumb || null,
+        name: row.arquivo_nome,
+        type: row.arquivo_tipo || 'image/jpeg'
+      });
+    }
   }
 
   return {
@@ -51,10 +68,11 @@ function transformFromDB(row) {
     data: row.data,
     descricao: row.descricao || '',
     copy: row.copy || '',
-    arquivo: arquivo,
-    // Image vem do campo 'image' que é base64
-    image: row.image || arquivo?.thumb || null,
-    imageName: row.imagename || arquivo?.nome || '',
+    // Campos antigos para compatibilidade
+    image: files.length > 0 ? files[0].url : null,
+    imageName: files.length > 0 ? files[0].name : '',
+    // Novo campo com múltiplos arquivos
+    files: files,
     alt: row.alt || '',
     history: history,
     createdAt: row.createdat || row.createdAt,
@@ -64,6 +82,18 @@ function transformFromDB(row) {
 
 // Transformar dados do front-end para formato do banco
 function transformToDB(demanda) {
+  // Salvar como array de arquivos
+  let files = demanda.files || [];
+
+  // Se tem arquivo único antigo mas não tem files array, migrar
+  if (files.length === 0 && demanda.image) {
+    files = [{
+      url: demanda.image,
+      name: demanda.imageName || 'imagem',
+      type: demanda.imageName?.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'
+    }];
+  }
+
   return {
     id: demanda.id,
     titulo: demanda.titulo,
@@ -75,15 +105,14 @@ function transformToDB(demanda) {
     data: demanda.data,
     descricao: demanda.descricao || '',
     copy: demanda.copy || '',
-    arquivo_tipo: demanda.arquivo?.tipo || null,
-    arquivo_thumb: demanda.arquivo?.thumb || null,
-    arquivo_nome: demanda.arquivo?.nome || null,
+    // Campos antigos para compatibilidade
+    image: files.length > 0 ? files[0].url : null,
+    imagename: files.length > 0 ? files[0].name : null,
+    // Novo campo com múltiplos arquivos
+    files: files,
     history: demanda.history || [],
     createdat: demanda.createdAt,
     updatedat: new Date().toISOString(),
-    // Image é o base64 direto - isso é o que falta!
-    image: demanda.image || null,
-    imagename: demanda.imageName || null,
     alt: demanda.alt || null
   };
 }
@@ -100,8 +129,8 @@ window.loadData = async function() {
       updateConnectionStatus();
       renderAll();
       console.log('📊 ' + demandas.length + ' demandas carregadas do Supabase');
-      const comImagens = demandas.filter(d => d.image).length;
-      console.log('🖼️  ' + comImagens + ' demandas com imagem');
+      const comArquivos = demandas.filter(d => d.files && d.files.length > 0).length;
+      console.log('📎 ' + comArquivos + ' demandas com arquivos');
     } else {
       throw new Error('No data');
     }
@@ -152,9 +181,9 @@ window.saveData = async function() {
     }
 
     console.log('💾 ' + demandas.length + ' demandas salvas no Supabase');
-    const comImagens = demandas.filter(d => d.image).length;
-    if (comImagens > 0) {
-      console.log('🖼️  ' + comImagens + ' demandas com imagem salva');
+    const comArquivos = demandas.filter(d => d.files && d.files.length > 0).length;
+    if (comArquivos > 0) {
+      console.log('📎 ' + comArquivos + ' demandas com arquivos');
     }
   } catch (err) {
     console.error('Erro ao salvar no Supabase:', err);
@@ -168,12 +197,18 @@ window.saveData = async function() {
   }
 };
 
-// Sobrescrever uploadImageToServer para usar base64 diretamente
-window.uploadImageToServer = async function(base64Data, filename) {
-  // No Vercel, salvamos a imagem em base64 diretamente na demanda
-  // Retornamos o próprio base64 como "URL"
-  console.log('📷 Salvando imagem em base64 diretamente...');
-  return base64Data; // Retorna o próprio base64 como "URL"
+// Sobrescrever uploadImageToServer para retornar array de arquivos
+window.uploadImageToServer = async function(filesData, filenames) {
+  // filesData é um array de {base64, filename}
+  // Retorna array de URLs (neste caso, os próprios base64)
+  console.log('📷 Salvando ' + filesData.length + ' arquivo(s) em base64...');
+  return filesData.map((base64, i) => ({
+    url: base64,
+    name: filenames[i] || 'arquivo',
+    type: filenames[i]?.endsWith('.pdf') ? 'application/pdf' :
+          filenames[i]?.endsWith('.mp4') ? 'video/mp4' :
+          filenames[i]?.endsWith('.doc') ? 'application/msword' : 'image/jpeg'
+  }));
 };
 
-console.log('🚀 CRM Perifa - Conectado ao Supabase (Vercel)');
+console.log('🚀 CRM Perifa - Conectado ao Supabase (Múltiplos Arquivos)');
