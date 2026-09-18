@@ -32,9 +32,9 @@ function transformFromDB(row) {
 
   // Tratar arquivo
   let arquivo = {
-    tipo: row.arquivo_tipo || (row.arquivo ? row.arquivo.tipo : null),
-    thumb: row.arquivo_thumb || (row.arquivo ? row.arquivo.thumb : null),
-    nome: row.arquivo_nome || (row.arquivo ? row.arquivo.nome : null)
+    tipo: row.arquivo_tipo || null,
+    thumb: row.arquivo_thumb || null,
+    nome: row.arquivo_nome || null
   };
   if (typeof row.arquivo === 'string') {
     try { arquivo = JSON.parse(row.arquivo); } catch {}
@@ -52,9 +52,9 @@ function transformFromDB(row) {
     descricao: row.descricao || '',
     copy: row.copy || '',
     arquivo: arquivo,
-    // Image vem direto do campo image ou arquivo.thumb
-    image: row.image || (row.arquivo ? row.arquivo.thumb : null) || null,
-    imageName: row.imagename || row.arquivo?.nome || '',
+    // Image vem do campo 'image' que é base64
+    image: row.image || arquivo?.thumb || null,
+    imageName: row.imagename || arquivo?.nome || '',
     alt: row.alt || '',
     history: history,
     createdAt: row.createdat || row.createdAt,
@@ -81,7 +81,8 @@ function transformToDB(demanda) {
     history: demanda.history || [],
     createdat: demanda.createdAt,
     updatedat: new Date().toISOString(),
-    image: demanda.image || null,  // Imagem em base64
+    // Image é o base64 direto - isso é o que falta!
+    image: demanda.image || null,
     imagename: demanda.imageName || null,
     alt: demanda.alt || null
   };
@@ -91,7 +92,6 @@ function transformToDB(demanda) {
 const originalLoadData = window.loadData;
 window.loadData = async function() {
   try {
-    // Select com todos os campos
     const data = await supabaseRequest('/demandas?select=*&order=id.asc');
 
     if (data && data.length > 0) {
@@ -100,7 +100,8 @@ window.loadData = async function() {
       updateConnectionStatus();
       renderAll();
       console.log('📊 ' + demandas.length + ' demandas carregadas do Supabase');
-      console.log('🖼️  Imagens:', demandas.filter(d => d.image).length + ' com imagem');
+      const comImagens = demandas.filter(d => d.image).length;
+      console.log('🖼️  ' + comImagens + ' demandas com imagem');
     } else {
       throw new Error('No data');
     }
@@ -144,16 +145,19 @@ window.saveData = async function() {
       }
     }
 
-    // Inserir todos - um por um para garantir que as imagens grandes sejam salvas
+    // Inserir todos
     for (const demanda of demandas) {
       const dbData = transformToDB(demanda);
       await supabaseRequest('/demandas', { method: 'POST', body: dbData });
     }
 
-    console.log('💾 ' + demandas.length + ' demandas salvas (incluindo imagens)');
+    console.log('💾 ' + demandas.length + ' demandas salvas no Supabase');
+    const comImagens = demandas.filter(d => d.image).length;
+    if (comImagens > 0) {
+      console.log('🖼️  ' + comImagens + ' demandas com imagem salva');
+    }
   } catch (err) {
     console.error('Erro ao salvar no Supabase:', err);
-    // Fallback para localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(demandas));
   }
 
@@ -164,4 +168,12 @@ window.saveData = async function() {
   }
 };
 
-console.log('🚀 CRM Perifa - Conectado ao Supabase');
+// Sobrescrever uploadImageToServer para usar base64 diretamente
+window.uploadImageToServer = async function(base64Data, filename) {
+  // No Vercel, salvamos a imagem em base64 diretamente na demanda
+  // Retornamos o próprio base64 como "URL"
+  console.log('📷 Salvando imagem em base64 diretamente...');
+  return base64Data; // Retorna o próprio base64 como "URL"
+};
+
+console.log('🚀 CRM Perifa - Conectado ao Supabase (Vercel)');
