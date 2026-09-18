@@ -2115,12 +2115,14 @@ function openModal(id) {
     }];
   }
 
+  if (!gallery) return;
+
   if (files.length === 0) {
     // No files
     gallery.innerHTML = '';
-    placeholder.style.display = 'flex';
+    if (placeholder) placeholder.style.display = 'flex';
   } else {
-    placeholder.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'none';
     gallery.innerHTML = files.map((file, i) => {
       var isImage = file.type && file.type.startsWith('image/');
       var isVideo = file.type && file.type.startsWith('video/');
