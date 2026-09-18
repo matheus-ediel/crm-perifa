@@ -1587,107 +1587,13 @@ function init() {
   document.getElementById('last-save').textContent = new Date().toLocaleString('pt-BR');
 }
 
+// NOVO: loadData é sobrescrito pelo supabase-client.js
 function loadData() {
-  // Primeiro tenta carregar do servidor
-  fetch('/api/data?t=' + Date.now())
-    .then(function(res) {
-      if (!res.ok) throw new Error('Server error');
-      return res.json();
-    })
-    .then(function(data) {
-      if (data && (data.demandas || Array.isArray(data))) {
-        demandas = data.demandas || data;
-        // Migrate old data structure to new (preserva URL da imagem)
-        demandas = demandas.map(function(d) {
-          return {
-            id: d.id,
-            titulo: d.titulo,
-            cliente: d.cliente,
-            pilar: d.pilar,
-            tipo: d.tipo,
-            canal: d.canal,
-            status: d.status,
-            data: d.data,
-            descricao: d.descricao || '',
-            copy: d.copy || '',
-            image: d.image || d.arquivo?.thumb || null, // Preserva URL da imagem
-            imageName: d.imageName || d.arquivo?.nome || '',
-            alt: d.alt || '',
-            history: d.history || [],
-            createdAt: d.createdAt,
-            updatedAt: d.updatedAt
-          };
-        });
-        isOnline = true;
-        updateConnectionStatus();
-        renderAll();
-        return;
-      }
-      throw new Error('No data');
-    })
-    .catch(function(err) {
-      console.log('Usando dados locais...');
-      // Fallback para localStorage
-      try {
-        var saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          demandas = JSON.parse(saved);
-          demandas = demandas.map(function(d) {
-            return {
-              id: d.id,
-              titulo: d.titulo,
-              cliente: d.cliente,
-              pilar: d.pilar,
-              tipo: d.tipo,
-              canal: d.canal,
-              status: d.status,
-              data: d.data,
-              descricao: d.descricao || '',
-              copy: d.copy || '',
-              image: d.image || d.arquivo?.thumb || null,
-              imageName: d.imageName || d.arquivo?.nome || '',
-              alt: d.alt || '',
-              history: d.history || [],
-              createdAt: d.createdAt,
-              updatedAt: d.updatedAt
-            };
-          });
-        } else {
-          demandas = JSON.parse(JSON.stringify(DEFAULT_DEMANDAS));
-        }
-      } catch (e) {
-        demandas = JSON.parse(JSON.stringify(DEFAULT_DEMANDAS));
-      }
-      isOnline = false;
-      updateConnectionStatus();
-      renderAll();
-    });
+  console.log('loadData() - será sobrescrito pelo Supabase client');
 }
 
 function saveData() {
-  // Salva no servidor (API)
-  fetch('/api/data', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(demandas)
-  })
-  .then(function(res) { return res.json(); })
-  .then(function(data) {
-    if (data.success) {
-      console.log('💾 Dados salvos no servidor');
-    }
-  })
-  .catch(function(err) {
-    console.log('Erro ao salvar no servidor, usando localStorage...');
-    // Fallback para localStorage
-    localStorage.setItem('crm-perifa-v3', JSON.stringify(demandas));
-  });
-
-  // Atualiza timestamp
-  var lastSaveEl = document.getElementById('last-save');
-  if (lastSaveEl) {
-    lastSaveEl.textContent = new Date().toLocaleString('pt-BR');
-  }
+  console.log('saveData() - será sobrescrito pelo Supabase client');
 }
 
 function updateConnectionStatus() {
@@ -2364,8 +2270,13 @@ function formatDate(dateStr) {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 }
+</script>
 
-// Start
+<!-- Supabase Client - carrega ANTES do init -->
+<script src="supabase-client.js"></script>
+
+<script>
+// Start - agora o supabase-client.js já sobrescreveu loadData
 init();
 </script>
 
@@ -2375,7 +2286,5 @@ init();
   Última atualização: <span id="last-save">—</span>
 </div>
 
-<!-- Supabase Client -->
-<script src="supabase-client.js"></script>
 </body>
 </html>
