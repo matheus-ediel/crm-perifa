@@ -131,18 +131,23 @@ window.loadData = async function() {
       console.log('📊 ' + demandas.length + ' demandas carregadas do Supabase');
       const comArquivos = demandas.filter(d => d.files && d.files.length > 0).length;
       console.log('📎 ' + comArquivos + ' demandas com arquivos');
+      // Salvar no localStorage para backup
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(demandas));
     } else {
+      // Supabase vazio - tentar localStorage
+      console.log('Supabase vazio, tentando localStorage...');
       throw new Error('No data');
     }
   } catch (err) {
-    console.error('Erro ao carregar do Supabase:', err);
-    // Tentar localStorage
+    console.log('Carregando do localStorage...');
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         demandas = JSON.parse(saved);
+        console.log('📦 ' + demandas.length + ' demandas do localStorage');
       } else if (typeof DEFAULT_DEMANDAS !== 'undefined') {
         demandas = JSON.parse(JSON.stringify(DEFAULT_DEMANDAS));
+        console.log('📋 ' + demandas.length + ' demandas padrão');
       } else {
         console.log('Sem dados disponíveis');
         demandas = [];
