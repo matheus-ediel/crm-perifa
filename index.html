@@ -2374,20 +2374,24 @@ function updateTipoFields() {
   // Tipos visuais que usam imagem
   const tiposVisuais = ['Post Instagram', 'Reels', 'Stories', 'LinkedIn', 'Site'];
 
-  const imageGroup = document.getElementById('image-upload-group');
+  const filesGroup = document.getElementById('files-upload-group');
   const copyGroup = document.getElementById('copy-group');
   const altGroup = document.getElementById('alt-group');
+
+  if (!filesGroup || !copyGroup || !altGroup) return;
 
   // Sempre mostra copy
   copyGroup.style.display = 'block';
 
-  // Mostra imagem para tipos visuais
+  // Mostra arquivos para todos os tipos
+  if (filesGroup) {
+    filesGroup.style.display = 'block';
+  }
+
+  // Alt text para tipos visuais
   if (tiposVisuais.includes(tipo)) {
-    imageGroup.style.display = 'block';
     altGroup.style.display = 'block';
   } else {
-    // Para textos, esconda imagem
-    imageGroup.style.display = 'block'; // Mostra, mas opcional
     altGroup.style.display = 'none';
   }
 }
